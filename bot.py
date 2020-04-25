@@ -73,6 +73,7 @@ def modifyUserTasks(user, remove):
     relPath = 'sheets/' + user.username + '.csv'
     absPath = os.path.join(directory, relPath)
 
+    os.system("touch " + absPath)
     csvFile = open(absPath, newline='')
     csvReader = csv.reader(csvFile, delimiter=',', quotechar='|')
     next(csvReader)  # skip heading row
@@ -246,7 +247,7 @@ class MyClient(discord.Client):
 
         if messageText == "stop-reminders":
             modifyUserStatus(message.author.id, False, None)
-            await message.channel.send("You have stopped reminders. Thanks for using Get Going Bot!")
+            await message.channel.send("You have stopped reminders. Thanks for using Impulse!")
             print("stopped for: " + message.author.name)
 
         if "sheet=" in messageText:
