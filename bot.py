@@ -132,6 +132,8 @@ def modifyUserStatus(id, add, sheetID):
             print('deleting user')
         except:
             print('User not in file.')
+    else:
+        users[str(id)].sheetID = sheetID
 
     # remove from text file
     idStr = str(id)
