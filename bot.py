@@ -24,10 +24,10 @@ class User:
     def __init__(self, username, discordID, sheetID):
         self.username = username
         self.discordID = str(discordID)
-        self.sheetID = str(sheetID)
+        self.sheetID = sheetID
 
     def setSheetID(self, sheetID):
-        self.sheetID = str(sheetID)
+        self.sheetID = sheetID
 
 
 # needed for schedule workaround
@@ -71,6 +71,8 @@ def getBool(inputStr):
 # goes through user's spreadsheet and reads in tasks
 # either adds or removes tasks depending on boolean 'remove' parameter
 def modifyUserTasks(user, remove):
+    if user.sheetID is None:
+        return
     directory = os.path.dirname(__file__)
     relPath = 'sheets/' + user.username + '.csv'
     absPath = os.path.join(directory, relPath)
