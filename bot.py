@@ -49,6 +49,8 @@ def readInUsers(client):
         lines = f.readlines()
         for line in lines:
             entry = line.strip("\n").split(":")
+            if entry[0] == '':
+                return
             discordID = entry[0]
             try:
                 sheetID = entry[1]
@@ -73,8 +75,14 @@ def modifyUserTasks(user, remove):
     relPath = 'sheets/' + user.username + '.csv'
     absPath = os.path.join(directory, relPath)
 
-    os.system("touch " + absPath)
+    try:
+        csvFile = open(absPath, newline='')
+    except:
+        os.system("touch " + absPath)
+        if remove is True:
+            return  # no need to clear csv file if it didn't exist
     csvFile = open(absPath, newline='')
+
     csvReader = csv.reader(csvFile, delimiter=',', quotechar='|')
     next(csvReader)  # skip heading row
     for row in csvReader:
@@ -132,7 +140,7 @@ def modifyUserStatus(id, add, sheetID):
         for line in lines:
             IDs = line.split(":")  # format is discordID:sheetID
             if IDs[0].strip("\n") != idStr:
-                f.write(line.strip("\n") + "\n")
+                f.write(line)
             else:
                 try:
                     prevSheetID = IDs[1]
