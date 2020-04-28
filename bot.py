@@ -99,7 +99,10 @@ def modifyUserTasks(user, remove):
         # add or remove task
         try:
             if remove:
-                tasks[task.time].remove(task)
+                # was causing double reminder issue - updated sheetID caused mismatch between user objects of tasks
+                # tasks[task.time].remove(task)
+                # removes any tasks scheduled by user at this time (will be replacing later)
+                tasks[task.time] = {i for i in tasks[task.time] if i.user.discordID != user.discordID}
             else:
                 tasks[task.time].add(task)
         except:
@@ -182,7 +185,7 @@ def readInMessages():
 
 
 def getRandomMessage():
-    index = rand.randint(0, len(remindMessages))
+    index = rand.randint(0, len(remindMessages)-1)
     return str(remindMessages[index])
 
 
@@ -259,7 +262,7 @@ class MyClient(discord.Client):
 
         if messageText == "stop-reminders":
             modifyUserStatus(message.author.id, False, None)
-            await message.channel.send("You have stopped reminders. Thanks for using Impulse!")
+            await message.channel.send("You have stopped reminders. ")
             print("stopped for: " + message.author.name)
 
         if "sheet=" in messageText:
