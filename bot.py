@@ -136,9 +136,10 @@ def modifyUserStatus(id, add, sheetID):
         except:
             print('User not in file.')
     else:
-        users[str(id)].sheetID = sheetID
+        if sheetID is not None:
+            users[str(id)].sheetID = sheetID
 
-    # remove from text file
+    # add/remove user to/from text file
     idStr = str(id)
     prevSheetID = None
     with open("users.txt", "r") as f:
