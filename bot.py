@@ -135,9 +135,6 @@ def modifyUserStatus(id, add, sheetID):
             print('deleting user')
         except:
             print('User not in file.')
-    else:
-        if sheetID is not None:
-            users[str(id)].sheetID = sheetID
 
     # add/remove user to/from text file
     idStr = str(id)
@@ -275,7 +272,10 @@ class MyClient(discord.Client):
             try:
                 ID = int(messageText.replace('add-user', ''))
                 modifyUserStatus(ID, True, None)
+                readInUsers(client)
                 await welcome(client.get_user(ID))
+                # print('Welcoming ' + str(client.get_user(ID).username))
+                print('Welcoming new user. ')
             except:
                 print('tried to add-user with non-integer ID')
 
