@@ -56,7 +56,7 @@ def readInUsers(client):
                 sheetID = entry[1]
             except:
                 sheetID = None
-            user = User(username=str(client.get_user(int(discordID)))[:-5], discordID=discordID, sheetID=sheetID)
+            user = User(username=str(client.get_user(int(discordID)))[:-5].replace(" ", "_"), discordID=discordID, sheetID=sheetID)
             users[str(discordID)] = user
 
 
