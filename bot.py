@@ -294,31 +294,38 @@ class MyClient(discord.Client):
             await message.channel.send("Your schedule information has been updated!")
 
         if "delay" in messageText:
+            newMessage = ''
             try:
                 time = [int(word) for word in messageText.split() if word.isdigit()]
                 time = time[0]
-                if "week" in messageText:  
+                unit = ''
+                if "week" in message.content:  
                     time = datetime.datetime.now() + datetime.timedelta(days=time*7)
-                    print('Delaying for ' + str(time) + 'week' if time == 1 else 'weeks' + '!')
-                elif "day" in messageText:  
+                    unit = 'week' if time == 1 else 'weeks'
+                    newMessage = 'Delaying for ' + str(time) + unit + '!'
+                elif "day" in message.content:  
                     time = datetime.datetime.now() + datetime.timedelta(days=time)
-                    print('Delaying for ' + str(time) + 'day' if time == 1 else 'days' + '!')
-                elif "hour" in messageText:  
-                    time = datetime.datetime.now() + datetime.timedelta(hour=time)
-                    print('Delaying for ' + str(time) + 'hour' if time == 1 else 'hours' + '!')
-                elif "minute" in messageText:  
+                    unit = 'day' if time == 1 else 'days'
+                    newMessage = 'Delaying for ' + str(time) + unit + '!'
+                elif "hour" in message.content:  
+                    time = datetime.datetime.now() + datetime.timedelta(hours=time)
+                    unit = 'hour' if time == 1 else 'hours'
+                    newMessage = 'Delaying for ' + str(time) + unit + '!'
+                elif "minute" in message.content:  
                     time = datetime.datetime.now() + datetime.timedelta(minutes=time)
-                    print('Delaying for ' + str(time) + 'minute' if time == 1 else 'minutes' + '!')
-                elif "second" in messageText:  
+                    unit = 'minute' if time == 1 else 'minutes'
+                    newMessage = 'Delaying for ' + str(time) + unit + '!'
+                elif "second" in message.content:  
                     time = datetime.datetime.now() + datetime.timedelta(seconds=time)
-                    print('Delaying for ' + str(time) + 'second' if time == 1 else 'seconds' + '!')
+                    unit = 'second' if time == 1 else 'seconds'
+                    newMessage = 'Delaying for ' + str(time) + unit + '!'
                 
                 task = users[message.author.id].lastTask
                 newTask = Task(user=task.user, name=task.name, isClass=task.isClass, message=task.message, time=time, days=task.days)
                 tasks[time].add(newTask)
             except:
-                print('Please use the format "delay for (number) of (unit)". Some units include days, minutes, weeks.')
-
+                newMessage = 'Please use the format "delay for (number) of (unit)" (WITH SPACES :eyes:). Some units include days, minutes, weeks.'
+            await message.channel.send(newMessage)
 
 client = MyClient()
 checkRemind.start()
