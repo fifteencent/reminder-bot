@@ -193,16 +193,17 @@ def getRandomMessage():
 async def sendReminders(time, client):
     weekday = datetime.datetime.now().weekday()  # zero-indexed starting on Monday
     for task in tasks[time]:
-        if task.days[weekday]:  # if task should run on this day
-            messageTemplate = "{0} time!"
-            if task.isClass:
-                messageTemplate = getRandomMessage()
+        if task.recurring and task.days[weekday] or not task.recurring and task.time[time]:  # if task should run on this day/time
+            if task.recurring:
+                messageTemplate = "{0} time!"
+                if task.isClass:
+                    messageTemplate = getRandomMessage()
             messageText = messageTemplate.format(task.name) + "  " + task.message
             print('sending reminder to ' + task.user.username)
             users[task.discordID].setLastTask(task)
+            await client.get_user(int(task.user.discordID)).send(messageText)
             if not task.recurring:
                 tasks[time].remove(task)
-            await client.get_user(int(task.user.discordID)).send(messageText)
 
 
 # pulls user sheet data
@@ -319,10 +320,10 @@ class MyClient(discord.Client):
                 newMessage = 'Delaying reminder for ' + str(ogTime) + unit + '!'
                 
                 task = users[message.author.id].lastTask
-                newTask = Task(user=task.user, name=task.name, isClass=task.isClass, message=task.message, time=time, days=task.days)
+                newTask = Task(user=task.user, name=task.name, isClass=task.isClass, message=task.message, time=time, days=time.weekday(), recurring=False)
                 tasks[time].add(newTask)
             except:
-                newMessage = 'Please use the format "delay for (number) of (unit)" (WITH SPACES :eyes:). Some units include days, minutes, weeks.'
+                newMessage = 'Please use the format "delay for (number) (unit(s))" (WITH SPACES :eyes:). Some units include days, minutes, weeks.'
             await message.channel.send(newMessage)
 
 client = MyClient()
