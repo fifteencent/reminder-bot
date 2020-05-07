@@ -8,16 +8,16 @@ import csv
 import random as rand
 import re
 
-
 # days is array of booleans representing whether the task is scheduled for that day (Mon -> Sun)
 class Task:
-    def __init__(self, user, name, isClass, message, time, days):
+    def __init__(self, user, name, isClass, message, time, days, recurring):
         self.user = user  # discord user object
         self.name = str(name)
         self.isClass = isClass
         self.message = str(message)
         self.days = days
         self.time = parse(str(time)).time()  # datetime time object
+        self.recurring = recurring
 
 
 class User:
@@ -25,10 +25,13 @@ class User:
         self.username = username
         self.discordID = str(discordID)
         self.sheetID = sheetID
+        self.lastTask = None
 
     def setSheetID(self, sheetID):
         self.sheetID = sheetID
 
+    def setLastTask(self, task):
+        self.lastTask = task
 
 # needed for schedule workaround
 def nothing():
@@ -94,7 +97,7 @@ def modifyUserTasks(user, remove):
             parse(str(row[3])).time()
         except:
             continue
-        task = Task(user=user, name=row[0], isClass=getBool(row[1]), message=row[2], time=row[3], days=days)
+        task = Task(user=user, name=row[0], isClass=getBool(row[1]), message=row[2], time=row[3], days=days, recurring=True)
 
         # add or remove task
         try:
@@ -196,6 +199,9 @@ async def sendReminders(time, client):
                 messageTemplate = getRandomMessage()
             messageText = messageTemplate.format(task.name) + "  " + task.message
             print('sending reminder to ' + task.user.username)
+            users[task.discordID].setLastTask(task)
+            if not task.recurring:
+                tasks[time].remove(task)
             await client.get_user(int(task.user.discordID)).send(messageText)
 
 
@@ -286,6 +292,32 @@ class MyClient(discord.Client):
         if messageText == "update":
             updateUserTasks(users[str(message.author.id)])
             await message.channel.send("Your schedule information has been updated!")
+
+        if "delay" in messageText:
+            try:
+                time = [int(word) for word in messageText.split() if word.isdigit()]
+                time = time[0]
+                if "week" in messageText:  
+                    time = datetime.datetime.now() + datetime.timedelta(days=time*7)
+                    print('Delaying for ' + str(time) + 'week' if time == 1 else 'weeks' + '!')
+                elif "day" in messageText:  
+                    time = datetime.datetime.now() + datetime.timedelta(days=time)
+                    print('Delaying for ' + str(time) + 'day' if time == 1 else 'days' + '!')
+                elif "hour" in messageText:  
+                    time = datetime.datetime.now() + datetime.timedelta(hour=time)
+                    print('Delaying for ' + str(time) + 'hour' if time == 1 else 'hours' + '!')
+                elif "minute" in messageText:  
+                    time = datetime.datetime.now() + datetime.timedelta(minutes=time)
+                    print('Delaying for ' + str(time) + 'minute' if time == 1 else 'minutes' + '!')
+                elif "second" in messageText:  
+                    time = datetime.datetime.now() + datetime.timedelta(seconds=time)
+                    print('Delaying for ' + str(time) + 'second' if time == 1 else 'seconds' + '!')
+                
+                task = users[message.author.id].lastTask
+                newTask = Task(user=task.user, name=task.name, isClass=task.isClass, message=task.message, time=time, days=task.days)
+                tasks[time].add(newTask)
+            except:
+                print('Please use the format "delay for (number) of (unit)". Some units include days, minutes, weeks.')
 
 
 client = MyClient()
