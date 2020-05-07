@@ -296,29 +296,27 @@ class MyClient(discord.Client):
         if "delay" in messageText:
             newMessage = ''
             try:
-                time = [int(word) for word in messageText.split() if word.isdigit()]
-                time = time[0]
+                time = datetime.datetime.now()
+                ogTime = [int(word) for word in messageText.split() if word.isdigit()]
+                ogTime = ogTime[0]
                 unit = ''
-                if "week" in message.content:  
-                    time = datetime.datetime.now() + datetime.timedelta(days=time*7)
-                    unit = 'week' if time == 1 else 'weeks'
-                    newMessage = 'Delaying for ' + str(time) + unit + '!'
-                elif "day" in message.content:  
-                    time = datetime.datetime.now() + datetime.timedelta(days=time)
-                    unit = 'day' if time == 1 else 'days'
-                    newMessage = 'Delaying for ' + str(time) + unit + '!'
-                elif "hour" in message.content:  
-                    time = datetime.datetime.now() + datetime.timedelta(hours=time)
-                    unit = 'hour' if time == 1 else 'hours'
-                    newMessage = 'Delaying for ' + str(time) + unit + '!'
+                if "week" in message.content:
+                    unit = 'week'
+                    time = datetime.datetime.now() + datetime.timedelta(days=ogTime*7)
+                elif "day" in message.content:
+                    unit = 'day'
+                    time = datetime.datetime.now() + datetime.timedelta(days=ogTime)
+                elif "hour" in message.content:
+                    unit = 'hour'
+                    time = datetime.datetime.now() + datetime.timedelta(hours=ogTime)
                 elif "minute" in message.content:  
-                    time = datetime.datetime.now() + datetime.timedelta(minutes=time)
-                    unit = 'minute' if time == 1 else 'minutes'
-                    newMessage = 'Delaying for ' + str(time) + unit + '!'
+                    unit = 'minute'
+                    time = datetime.datetime.now() + datetime.timedelta(minutes=ogTime)
                 elif "second" in message.content:  
-                    time = datetime.datetime.now() + datetime.timedelta(seconds=time)
-                    unit = 'second' if time == 1 else 'seconds'
-                    newMessage = 'Delaying for ' + str(time) + unit + '!'
+                    unit = 'second'
+                    time = datetime.datetime.now() + datetime.timedelta(seconds=ogTime)
+                unit = (' ' + unit) if ogTime == 1 else (' ' + unit + 's')
+                newMessage = 'Delaying reminder for ' + str(ogTime) + unit + '!'
                 
                 task = users[message.author.id].lastTask
                 newTask = Task(user=task.user, name=task.name, isClass=task.isClass, message=task.message, time=time, days=task.days)
